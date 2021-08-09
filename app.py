@@ -27,6 +27,7 @@ from dash.dependencies import Output,Input,State
 # Modules
 from modules import AgentSales as agentSales
 from modules import PopularPackages as popularPackages
+from modules import AgentNames as agentNames
 
 # app = dash.Dash("app")
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -63,7 +64,7 @@ packagesData = db.getPackages()
 
 
 
-
+agentName = "Janet Delton"
 # Dash html for selection menus
 app.layout = html.Div([
     html.Div(
@@ -91,6 +92,28 @@ app.layout = html.Div([
                 ],
                     value="agentSales"),
         ]),
+            html.Br(),
+                html.Div(
+                    className=("row"),
+                    children=[
+                        html.Div(
+                            className=("left"),
+                            children=[
+                                html.Label(["Selection: "]),
+                            ]),
+                            html.Div(
+                                className=("center"),
+                                children=[
+                                    dcc.Dropdown(
+                                        # Agent names from module
+                                        id="agentDropDown",
+                                        options=agentName,
+                                        value="All"
+                                    )
+                                ]),
+                    ],
+                ),
+
             html.Div(
                 className="row",
                 children=[
@@ -131,22 +154,35 @@ app.layout = html.Div([
 
 
 # Input from workshop 2
-agentName = "Janet Delton"
+
+
+# Callbacks from selection changes - Update selection menu with either agent names or supplier names
+@app.callback(
+    Output("agentDropDown", "options"),
+    Input("dropDown", "value")
+)
+def update_dropDown(dropDown):
+    if dropDown=="agentSales":
+        return agentNames.GetAgentNames(agentData)
+    else:
+        return [{"label": "All", "value": "All"}]
+
 
 # Callbacks from selection changes - Display graph based on selection
 @app.callback(
     Output('graph1', 'figure'),
     [Input("dropDown", "value"),
+     Input("agentDropDown", "value"),
      Input('my-date-picker-range', 'start_date'),
      Input('my-date-picker-range', 'end_date')]
 )
-def update_output(dropDown, start_date, end_date):
+def update_output(dropDown, agentDropDown, start_date, end_date):
     if start_date is not None:
         start_date_object = start_date
     if end_date is not None:
         end_date_object = end_date
     if dropDown=="agentSales":
-        selectGraph=agentSales.AgentSales(agentName, start_date_object, end_date_object,salesData,bookingData,customerData,agentData)
+        selectGraph=agentSales.AgentSales(agentDropDown, start_date_object, end_date_object,salesData,bookingData,customerData,agentData)
     elif dropDown=="popularPackages":
         selectGraph=popularPackages.PopularPackages(packagesData)
     return selectGraph
