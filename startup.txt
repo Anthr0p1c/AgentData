@@ -1,1 +1,1 @@
-gunicorn --bind=0.0.0.0 --timeout 600 startup:app
+gunicorn application:app.server -b :8000
