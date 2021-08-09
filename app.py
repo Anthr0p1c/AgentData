@@ -11,6 +11,7 @@ Manager data analysis portal
 
 import dash
 import dash_core_components as dcc
+import dash_table
 from dash_core_components.Dropdown import Dropdown
 import dash_html_components as html
 from numpy import append, array
@@ -24,18 +25,14 @@ import datetime
 from dash.dependencies import Output,Input,State
 
 # Modules
-from modules import TotalSales as totalSales
 from modules import AgentSales as agentSales
-from modules import SupplierSales as supplierSales
-from modules import Commissions as commissions
-from modules import AgentNames as agentNames
-from modules import SupplierNames as supplierNames
+from modules import PopularPackages as popularPackages
 
 # app = dash.Dash("app")
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
+
 
 
 
@@ -60,6 +57,9 @@ supplierData = db.getSuppliers()
 # Product Supplier data
 productSupplierData = db.getProductsSuppliers()
 
+# Packages data
+packagesData = db.getPackages()
+
 
 
 
@@ -69,7 +69,7 @@ app.layout = html.Div([
     html.Div(
         className=("dropGraph"),
         children=[
-            html.P('Travel Experts Manager Portal')
+            html.P('Travel Experts Agent Portal')
         ]),
     html.Div(
         className=("row"),
@@ -86,34 +86,11 @@ app.layout = html.Div([
                     dcc.Dropdown(
                         id="dropDown",
                         options=[
-                            {'label': 'Total Sales And Commissions', 'value': "totalSales"},
-                            {'label': 'Sales By Agents', 'value': "agentSales"},
-                            {'label': 'Sales By Supplier', 'value': "supplierSales"},
-                            {"label": "Total and Average Commissions", "value": "commissions"}
+                            {'label': 'Sales By Agent', 'value': "agentSales"},
+                            {'label': 'Popular Packages', 'value': "popularPackages"},
                 ],
-                    value="totalSales"),
+                    value="agentSales"),
         ]),
-            html.Br(),
-            html.Div(
-                className=("row"),
-                children=[
-                    html.Div(
-                        className=("left"),
-                        children=[
-                            html.Label(["Selection: "]),
-                        ]),
-                        html.Div(
-                            className=("center"),
-                            children=[
-                                dcc.Dropdown(
-                                    # Agent names from module
-                                    id="agentDropDown",
-                                    options=agentNames.GetAgentNames(agentData),
-                                    value="All"
-                                )
-                            ]),
-                ],
-            ),
             html.Div(
                 className="row",
                 children=[
@@ -153,43 +130,25 @@ app.layout = html.Div([
 ])
 
 
-
-
-
-# Callbacks from selection changes - Update selection menu with either agent names or supplier names
-@app.callback(
-    Output("agentDropDown", "options"),
-    Input("dropDown", "value")
-)
-def update_dropDown(dropDown):
-    if dropDown=="agentSales":
-        return agentNames.GetAgentNames(agentData)
-    elif dropDown=="supplierSales":
-        return supplierNames.GetSupplierNames(supplierData)
-    else:
-        return [{"label": "All", "value": "All"}]
+# Input from workshop 2
+agentName = "All"
 
 # Callbacks from selection changes - Display graph based on selection
 @app.callback(
     Output('graph1', 'figure'),
     [Input("dropDown", "value"),
-     Input("agentDropDown", "value"),
      Input('my-date-picker-range', 'start_date'),
      Input('my-date-picker-range', 'end_date')]
 )
-def update_output(dropDown, agentDropDown, start_date, end_date):
+def update_output(dropDown, start_date, end_date):
     if start_date is not None:
         start_date_object = start_date
     if end_date is not None:
         end_date_object = end_date
-    if dropDown=="totalSales":
-        selectGraph=totalSales.TotalSales(start_date_object, end_date_object,salesData)
-    elif dropDown=="agentSales":
-        selectGraph=agentSales.AgentSales(agentDropDown, start_date_object, end_date_object,salesData,bookingData,customerData,agentData)
-    elif dropDown=="supplierSales":
-        selectGraph=supplierSales.SupplierSales(agentDropDown, start_date_object, end_date_object,supplierData, productSupplierData, salesData)
-    else:
-        selectGraph=commissions.Commissions(start_date_object, end_date_object,salesData)
+    if dropDown=="agentSales":
+        selectGraph=agentSales.AgentSales(agentName, start_date_object, end_date_object,salesData,bookingData,customerData,agentData)
+    elif dropDown=="popularPackages":
+        selectGraph=popularPackages.PopularPackages(packagesData)
     return selectGraph
 
 
@@ -197,4 +156,4 @@ def update_output(dropDown, agentDropDown, start_date, end_date):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
