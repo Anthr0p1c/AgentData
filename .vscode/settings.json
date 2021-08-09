@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/12e4500c-8a39-438c-93ed-3f20827c87a1/resourceGroups/TravelExperts/providers/Microsoft.Web/sites/Travel-Experts-Python",
+    "appService.deploySubpath": "."
+}
