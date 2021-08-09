@@ -32,7 +32,7 @@ from modules import PopularPackages as popularPackages
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
+server = app.server
 
 
 
@@ -156,4 +156,4 @@ def update_output(dropDown, start_date, end_date):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
