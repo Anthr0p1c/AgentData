@@ -131,7 +131,7 @@ app.layout = html.Div([
 
 
 # Input from workshop 2
-agentName = "All"
+agentName = "Janet Delton"
 
 # Callbacks from selection changes - Display graph based on selection
 @app.callback(
